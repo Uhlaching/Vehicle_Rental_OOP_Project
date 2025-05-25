@@ -1,0 +1,149 @@
+package com.mycompany.vehicle_rental_systm;
+import java.util.*;
+
+class Vehicle {
+    String vehicleId;
+    String category;
+    String model;
+    boolean isAvailable;
+    double pricePerDay;
+
+    public Vehicle(String vehicleId, String category, String model, double pricePerDay) {
+        this.vehicleId = vehicleId;
+        this.category = category;
+        this.model = model;
+        this.pricePerDay = pricePerDay;
+        this.isAvailable = true;
+    }
+}
+
+class Rental {
+    String rentalId;
+    String userName;
+    String vehicleId;
+    int days;
+    boolean isPaid;
+    double amountPaid;
+
+    public Rental(String rentalId, String userName, String vehicleId, int days) {
+        this.rentalId = rentalId;
+        this.userName = userName;
+        this.vehicleId = vehicleId;
+        this.days = days;
+        this.isPaid = false;
+        this.amountPaid = 0.0;
+    }
+}
+
+class Rating {
+    String userName;
+    String vehicleId;
+    int rating; // 1 to 5
+
+    public Rating(String userName, String vehicleId, int rating) {
+        this.userName = userName;
+        this.vehicleId = vehicleId;
+        this.rating = rating;
+    }
+}
+
+public class Vehicle_Rental_Systm {
+    static Scanner scanner = new Scanner(System.in);
+    static List<Vehicle> vehicles = new ArrayList<>();
+    static List<Rental> rentals = new ArrayList<>();
+    static List<Rating> ratings = new ArrayList<>();
+
+    public static void main(String[] args) {
+        addDummyVehicles();
+
+        while (true) {
+            System.out.println("\n1. View Vehicle Categories\n2. Rent Vehicle\n3. Make Payment\n4. Rate Vehicle\n5. Exit");
+            int choice = scanner.nextInt();
+            switch (choice) {
+                case 1: viewCategories(); break;
+                case 2: rentVehicle(); break;
+                case 3: makePayment(); break;
+                case 4: rateVehicle(); break;
+                case 5: System.exit(0);
+                default: System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    static void addDummyVehicles() {
+        vehicles.add(new Vehicle("V101", "Car", "Toyota Corolla", 50.0));
+        vehicles.add(new Vehicle("V102", "Bike", "Yamaha FZ", 20.0));
+        vehicles.add(new Vehicle("V103", "Van", "Honda Odyssey", 70.0));
+        vehicles.add(new Vehicle("V104", "SUV", "Ford Explorer", 90.0));
+    }
+
+    static void viewCategories() {
+        System.out.println("\nAvailable Vehicles:");
+        for (Vehicle v : vehicles) {
+            System.out.println("ID: " + v.vehicleId + " | Category: " + v.category + " | Model: " + v.model +
+                               " | Price/Day: $" + v.pricePerDay + " | Available: " + v.isAvailable);
+        }
+    }
+
+    static void rentVehicle() {
+        System.out.print("Enter your name: ");
+        String name = scanner.next();
+        System.out.print("Enter vehicle ID: ");
+        String vehicleId = scanner.next();
+        System.out.print("Enter rental days: ");
+        int days = scanner.nextInt();
+
+        for (Vehicle v : vehicles) {
+            if (v.vehicleId.equalsIgnoreCase(vehicleId) && v.isAvailable) {
+                v.isAvailable = false;
+                Rental r = new Rental(UUID.randomUUID().toString(), name, vehicleId, days);
+                rentals.add(r);
+                System.out.println("Rental successful! Rental ID: " + r.rentalId);
+                return;
+            }
+        }
+        System.out.println("Vehicle not available.");
+    }
+
+    static void makePayment() {
+        System.out.print("Enter rental ID: ");
+        String rentalId = scanner.next();
+
+        for (Rental r : rentals) {
+            if (r.rentalId.equals(rentalId)) {
+                if (!r.isPaid) {
+                    for (Vehicle v : vehicles) {
+                        if (v.vehicleId.equals(r.vehicleId)) {
+                            double total = r.days * v.pricePerDay;
+                            r.amountPaid = total;
+                            r.isPaid = true;
+                            System.out.println("Payment of $" + total + " completed.");
+                            return;
+                        }
+                    }
+                } else {
+                    System.out.println("Payment already made.");
+                }
+                return;
+            }
+        }
+        System.out.println("Rental not found.");
+    }
+
+    static void rateVehicle() {
+        System.out.print("Enter your name: ");
+        String name = scanner.next();
+        System.out.print("Enter vehicle ID: ");
+        String vehicleId = scanner.next();
+        System.out.print("Enter rating (1-5): ");
+        int rate = scanner.nextInt();
+
+        if (rate < 1 || rate > 5) {
+            System.out.println("Invalid rating. Must be between 1 and 5.");
+            return;
+        }
+
+        ratings.add(new Rating(name, vehicleId, rate));
+        System.out.println("Thank you for your feedback!");
+    }
+}
